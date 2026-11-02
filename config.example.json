@@ -1,0 +1,70 @@
+{
+  "explorer": {
+    "restartPolicy": "auto"
+  },
+  "reg": {
+    "enabled": true,
+    "files": []
+  },
+  "nvidia": {
+    "enabled": true,
+    "exePath": "tools\\NVIDIA\\nvidiaProfileInspector.exe",
+    "profilePath": "profiles\\nvidia.nip",
+    "arguments": "-silentImport {profile}",
+    "timeoutSeconds": 60
+  },
+  "resolutions": {
+    "enabled": true,
+    "display": "",
+    "timing": "native",
+    "timingStandard": "auto",
+    "modes": [
+      { "width": 1080, "height": 1080 },
+      { "width": 1440, "height": 1440, "refresh": 144 }
+    ]
+  },
+  "scaling": {
+    "enabled": true,
+    "display": "",
+    "mode": "fullscreen"
+  },
+  "audio": {
+    "enabled": true,
+    "speakerVolume": 70,
+    "microphoneVolume": 100,
+    "disableBoost": true,
+    "disableAgc": true,
+    "usbOnly": true,
+    "speakerDeviceId": "",
+    "microphoneDeviceId": ""
+  },
+  "symlink": {
+    "enabled": true,
+    "root": "D:\\GameFix",
+    "recreate": true,
+    "includeProgramData": true,
+    "includeProgramFiles": false,
+    "timeoutSeconds": 180
+  },
+  "steam": {
+    "enabled": true,
+    "installPath": "",
+    "source": "D:\\GameFix\\Steam",
+    "waitSeconds": 60,
+    "downloadIcons": true,
+    "links": [
+      { "path": "appcache", "source": "appcache" },
+      { "path": "depotcache", "source": "depotcache" },
+      { "path": "steam\\games", "source": "steam_games" }
+    ]
+  },
+  "guard": {
+    "enabled": true
+  },
+  "taskbar": {
+    "enabled": true
+  },
+  "shortcuts": {
+    "enabled": true
+  }
+}
