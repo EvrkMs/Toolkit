@@ -28,7 +28,66 @@ namespace Toolkit
             public string Source;
         }
 
+        /// <summary>Команда audio целиком: сначала устройства, потом уровни.</summary>
         public static int Run(ToolkitConfig cfg)
+        {
+            if (!cfg.Audio.Enabled)
+            {
+                Log.Write("AUDIO", "SKIP disabled");
+                return 0;
+            }
+
+            int devices = RunDevices(cfg);
+            int levels = RunLevels(cfg);
+            return Math.Max(devices, levels);
+        }
+
+        /// <summary>
+        /// Шаг audio.devices: отключает все устройства ВЫВОДА, которые не USB (встроенный Realtek, HDMI/DP NVIDIA,
+        /// Bluetooth), независимо от того, подключено ли USB-устройство. Если USB-вывод есть, он становится
+        /// устройством по умолчанию; если нет, Windows сама назначит его при подключении, потому что других не осталось.
+        /// Устройства ввода (микрофоны) не отключаются никогда.
+        /// Шаг должен выполняться после загрузки драйвера NVIDIA и появления его аудио (gate NvidiaAudio).
+        /// </summary>
+        public static int RunDevices(ToolkitConfig cfg)
+        {
+            AudioConfig audio = cfg.Audio;
+
+            if (!audio.Enabled || !audio.UsbOnly.HasValue || !audio.UsbOnly.Value)
+            {
+                Log.Write("AUDIO", "devices SKIP usbOnly выключен");
+                return 0;
+            }
+
+            try
+            {
+                ApplyUsbOnly(EDataFlow.eRender, "out");
+                return 0;
+            }
+            catch (Exception ex)
+            {
+                Log.Write("AUDIO", "devices ERROR " + ex.Message);
+                return 10;
+            }
+        }
+
+        /// <summary>
+        /// Есть ли среди устройств вывода звук NVIDIA (HDMI/DP). Нужно gate'у NvidiaAudio: пока оно не появилось,
+        /// отключать его рано, потому что его просто не окажется в списке.
+        /// </summary>
+        public static bool HasNvidiaRenderEndpoint()
+        {
+            foreach (EndpointRef endpoint in EnumerateEndpoints(EDataFlow.eRender, DEVICE_STATE_ACTIVE | DEVICE_STATE_UNPLUGGED, "nvidia-scan"))
+            {
+                string name = GetEndpointName(endpoint.Device);
+                if (name != null && name.IndexOf("NVIDIA", StringComparison.OrdinalIgnoreCase) >= 0) return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>Шаг audio.levels: громкость колонок и микрофона, AGC, усиление микрофона. Ничего не отключает.</summary>
+        public static int RunLevels(ToolkitConfig cfg)
         {
             AudioConfig audio = cfg.Audio;
 
@@ -40,14 +99,6 @@ namespace Toolkit
 
             try
             {
-                // До громкости и AGC: после отключения лишних устройств
-                // дефолтными становятся USB, и дальнейшие шаги работают с ними.
-                if (audio.UsbOnly.HasValue && audio.UsbOnly.Value)
-                {
-                    ApplyUsbOnly(EDataFlow.eRender, "out");
-                    ApplyUsbOnly(EDataFlow.eCapture, "in");
-                }
-
                 if (audio.SpeakerVolume >= 0)
                 {
                     EndpointRef speaker = ResolvePreferredEndpoint(audio.SpeakerDeviceId, EDataFlow.eRender, false);
@@ -105,9 +156,9 @@ namespace Toolkit
         }
 
         /// <summary>
-        /// Для каждого направления отдельно: если есть активное USB-устройство, все остальные
-        /// (HDMI/NVIDIA, встроенное, Bluetooth) отключаются, а USB становится устройством по умолчанию.
-        /// Без USB-устройства направление не трогается, чтобы не остаться совсем без звука.
+        /// Все не-USB устройства направления (HDMI/NVIDIA, встроенное, Bluetooth) отключаются всегда,
+        /// есть USB-устройство или нет. Если активное USB-устройство есть, оно становится устройством
+        /// по умолчанию; если нет, других устройств не осталось, и Windows сама назначит USB при подключении.
         /// </summary>
         private static void ApplyUsbOnly(EDataFlow flow, string label)
         {
@@ -127,9 +178,9 @@ namespace Toolkit
                 if ((endpoint.State & (int)DEVICE_STATE_ACTIVE) != 0) usbActive = true;
             }
 
-            if (!usbActive)
+            if (others.Count == 0 && !usbActive)
             {
-                Log.Write("AUDIO", "usbOnly " + label + " SKIP: нет активного USB-устройства (other=" + others.Count + ")");
+                Log.Write("AUDIO", "usbOnly " + label + " nothing to do: устройств нет");
                 return;
             }
 
@@ -145,11 +196,15 @@ namespace Toolkit
             }
 
             // Сначала USB по умолчанию: иначе система переключит дефолт на случайное устройство.
-            EndpointRef primaryUsb = FindPrimaryActive(usb);
-            foreach (ERole role in new[] { ERole.eConsole, ERole.eMultimedia, ERole.eCommunications })
+            // Без активного USB дефолт не трогаем.
+            EndpointRef primaryUsb = usbActive ? FindPrimaryActive(usb) : null;
+            if (primaryUsb != null)
             {
-                int hrDefault = policy.SetDefaultEndpoint(primaryUsb.Id, role);
-                if (hrDefault != 0) Log.Write("AUDIO", "usbOnly " + label + " default " + role + " FAIL hr=" + Hr(hrDefault));
+                foreach (ERole role in new[] { ERole.eConsole, ERole.eMultimedia, ERole.eCommunications })
+                {
+                    int hrDefault = policy.SetDefaultEndpoint(primaryUsb.Id, role);
+                    if (hrDefault != 0) Log.Write("AUDIO", "usbOnly " + label + " default " + role + " FAIL hr=" + Hr(hrDefault));
+                }
             }
 
             int disabled = 0;
@@ -162,7 +217,7 @@ namespace Toolkit
             }
 
             Log.Write("AUDIO", "usbOnly " + label + " usb=" + usb.Count + " disabled=" + disabled + "/" + others.Count +
-                               " default=" + GetEndpointName(primaryUsb.Device));
+                               " default=" + (primaryUsb == null ? "<не менялся, USB нет>" : GetEndpointName(primaryUsb.Device)));
         }
 
         /// <summary>USB, если коннектор конечной точки ведёт на адаптер с путём usb#vid_...</summary>

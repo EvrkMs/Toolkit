@@ -58,6 +58,11 @@
       { "path": "steam\\games", "source": "steam_games" }
     ]
   },
+  "gates": {
+    "gpuDriverSeconds": 60,
+    "nvidiaAudioSeconds": 15,
+    "shellSeconds": 15
+  },
   "guard": {
     "enabled": true
   },

@@ -39,6 +39,7 @@ namespace Toolkit
             }
 
             ExplorerRestart.Policy = cli.Option("--explorer-restart", cfg.Explorer.RestartPolicy);
+            Readiness.Init(cfg);
 
             Log.Write("MAIN", "START verb=" + cli.Verb +
                               (string.IsNullOrWhiteSpace(cli.SubVerb) ? "" : " " + cli.SubVerb) +
@@ -76,16 +77,25 @@ namespace Toolkit
                 case "guard":
                     return GuardVerb.Run(cfg, cli);
 
+                // Отдельные команды ждут готовности системы так же, как шаги в run
+                // (gate опрашивается один раз, повторный Wait возвращается сразу).
                 case "nvidia":
+                    Readiness.GpuDriver.Wait();
                     return NvidiaVerb.Run(cfg);
 
                 case "resolutions":
+                    Readiness.GpuDriver.Wait();
                     return Math.Max(ResolutionsVerb.Run(cfg), ResolutionsVerb.EnsureMaxRefresh(cfg));
 
                 case "scaling":
+                    Readiness.GpuDriver.Wait();
                     return ScalingVerb.Run(cfg);
 
                 case "audio":
+                    if (cfg.Audio.Enabled && cfg.Audio.UsbOnly.HasValue && cfg.Audio.UsbOnly.Value)
+                    {
+                        Readiness.NvidiaAudio.Wait();
+                    }
                     return AudioVerb.Run(cfg);
 
                 case "symlink":

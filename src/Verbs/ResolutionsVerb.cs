@@ -145,33 +145,21 @@ namespace Toolkit
 
         /// <summary>
         /// Ждёт, пока дисплей перейдёт на драйвер NVIDIA и список частот перестанет меняться.
-        /// Раньше шаг стартовал сразу и мог поймать базовый адаптер с 60 Гц.
+        /// Сам драйвер ждёт общий gate (Readiness.GpuDriver, опрашивается один раз на весь прогон):
+        /// здесь остаётся только ожидание стабильного списка режимов, которое нужно именно этому шагу.
         /// </summary>
         private static void WaitForGpuDriver(string display)
         {
-            const int driverTimeoutMs = 60000;
+            const int stabilityTimeoutMs = 15000;
             const int stableReadsNeeded = 3;
 
-            int waited = 0;
-            bool nvidia = false;
-            while (waited < driverTimeoutMs)
+            if (!Readiness.GpuDriver.Wait())
             {
-                string adapter = DisplayInterop.AdapterDescription(display);
-                if (adapter != null && adapter.IndexOf("NVIDIA", StringComparison.OrdinalIgnoreCase) >= 0)
-                {
-                    nvidia = true;
-                    break;
-                }
-
-                System.Threading.Thread.Sleep(500);
-                waited += 500;
-            }
-
-            if (!nvidia)
-            {
-                Log.Write(C, "WARN driver NVIDIA не появился за " + (waited / 1000) + " c, adapter=" + DisplayInterop.AdapterDescription(display));
+                Log.Write(C, "WARN driver NVIDIA не появился, adapter=" + DisplayInterop.AdapterDescription(display));
                 return;
             }
+
+            int waited = 0;
 
             // Драйвер загружен, но EDID и список режимов могут дочитываться: ждём стабильного максимума.
             int nativeW, nativeH;
@@ -183,7 +171,7 @@ namespace Toolkit
 
             int last = -1;
             int stable = 0;
-            while (waited < driverTimeoutMs && stable < stableReadsNeeded)
+            while (waited < stabilityTimeoutMs && stable < stableReadsNeeded)
             {
                 int now = DisplayInterop.MaxRefresh(display, nativeW, nativeH);
                 stable = (now == last && now > 0) ? stable + 1 : 0;

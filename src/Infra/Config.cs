@@ -99,6 +99,10 @@ namespace Toolkit
         [DataMember(Name = "shortcuts")]
         public StepConfig Shortcuts { get; set; }
 
+        /// <summary>Сколько шаги ждут готовности системы (драйвер видеокарты, NVIDIA-аудио, оболочка).</summary>
+        [DataMember(Name = "gates")]
+        public GatesConfig Gates { get; set; }
+
         /// <summary>Не даёт GameFix.bat убивать explorer.exe через taskkill (см. GuardVerb).</summary>
         [DataMember(Name = "guard")]
         public StepConfig Guard { get; set; }
@@ -127,6 +131,8 @@ namespace Toolkit
             if (Taskbar == null) Taskbar = new StepConfig();
             if (Shortcuts == null) Shortcuts = new StepConfig();
             if (Guard == null) Guard = new StepConfig();
+            if (Gates == null) Gates = new GatesConfig();
+            Gates.ApplyDefaults();
 
             if (string.IsNullOrWhiteSpace(Explorer.RestartPolicy))
             {
@@ -181,6 +187,41 @@ namespace Toolkit
         /// <summary>Подпапка в source, на которую ведёт ссылка.</summary>
         [DataMember(Name = "source")]
         public string Source { get; set; }
+    }
+
+    /// <summary>
+    /// Таймауты ожидания готовности системы. Gate только задерживает шаг: по таймауту шаг всё равно запускается.
+    /// </summary>
+    [DataContract]
+    internal sealed class GatesConfig
+    {
+        /// <summary>Сколько секунд ждать, пока дисплей перейдёт на драйвер NVIDIA. Не задано — 60.</summary>
+        [DataMember(Name = "gpuDriverSeconds")]
+        public int? GpuDriverSeconds { get; set; }
+
+        /// <summary>
+        /// Сколько секунд после загрузки драйвера ждать звуковое устройство NVIDIA. Не задано — 15, 0 — не ждать.
+        /// Для ПК, где HDMI-звук NVIDIA выключен, можно поставить 0.
+        /// </summary>
+        [DataMember(Name = "nvidiaAudioSeconds")]
+        public int? NvidiaAudioSeconds { get; set; }
+
+        /// <summary>Сколько секунд ждать оболочку Windows перед раскладкой иконок. Не задано — 15.</summary>
+        [DataMember(Name = "shellSeconds")]
+        public int? ShellSeconds { get; set; }
+
+        public void ApplyDefaults()
+        {
+            GpuDriverSeconds = Clamp(GpuDriverSeconds, 60);
+            NvidiaAudioSeconds = Clamp(NvidiaAudioSeconds, 15);
+            ShellSeconds = Clamp(ShellSeconds, 15);
+        }
+
+        private static int Clamp(int? value, int fallback)
+        {
+            if (!value.HasValue) return fallback;
+            return value.Value < 0 ? 0 : value.Value;
+        }
     }
 
     [DataContract]
