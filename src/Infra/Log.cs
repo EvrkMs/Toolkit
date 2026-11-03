@@ -10,11 +10,33 @@ namespace Toolkit
         private static string _path;
         private static bool _echo;
 
-        public static void Init(string baseDir, bool echoToConsole)
+        /// <summary>
+        /// Папка Toolkit общая для многих ПК, поэтому у каждого ПК свой файл: toolkit-ИМЯ_ПК.log.
+        /// </summary>
+        public static void Init(string logsDir, bool echoToConsole)
         {
-            _path = Path.Combine(baseDir, "logs", "toolkit.log");
-            Directory.CreateDirectory(Path.GetDirectoryName(_path));
+            _path = Path.Combine(logsDir, "toolkit-" + SafeFileName(Environment.MachineName) + ".log");
             _echo = echoToConsole;
+
+            try
+            {
+                Directory.CreateDirectory(logsDir);
+            }
+            catch
+            {
+                // Нет доступа к папке логов (например, диск ещё не примонтирован): пишем дальше без падения.
+            }
+        }
+
+        private static string SafeFileName(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name)) return "pc";
+
+            foreach (char bad in Path.GetInvalidFileNameChars())
+            {
+                name = name.Replace(bad, '_');
+            }
+            return name;
         }
 
         public static void Write(string component, string message)

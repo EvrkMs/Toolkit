@@ -16,7 +16,7 @@ namespace Toolkit
 
         public static readonly string[] ValueOptions = new[]
         {
-            "--config", "--explorer-restart", "--root", "--source", "--dest",
+            "--home", "--config", "--explorer-restart", "--root", "--source", "--dest",
             "--recreate", "--include-programdata", "--include-program-files",
             "--resolution", "--profile"
         };

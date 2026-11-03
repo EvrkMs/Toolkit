@@ -89,7 +89,7 @@ namespace Toolkit
             if (mappings.Count == 0)
             {
                 Log.Write("SYMLINK", "no valid mappings (root=" + opt.Root + ")");
-                return 10;
+                return ExitCode.Failed;
             }
 
             Counters total = new Counters();
@@ -105,7 +105,7 @@ namespace Toolkit
                                  " failed=" + total.Failed +
                                  (opt.DryRun ? " (dry-run)" : ""));
 
-            return total.Failed > 0 ? 10 : 0;
+            return total.Failed > 0 ? ExitCode.Failed : ExitCode.Ok;
         }
 
         private static List<Mapping> BuildSingleMapping(Options opt)

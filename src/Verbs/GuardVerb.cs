@@ -33,7 +33,7 @@ namespace Toolkit
                     return cfg.Guard.Enabled ? Install() : Remove();
                 default:
                     Log.Write(C, "usage: Toolkit.exe guard install|remove|status");
-                    return 2;
+                    return ExitCode.Usage;
             }
         }
 
@@ -47,11 +47,11 @@ namespace Toolkit
         {
             try
             {
-                string source = Path.Combine(Paths.BaseDir, "tkguard.exe");
+                string source = Path.Combine(Paths.ExeDir, "tkguard.exe");
                 if (!File.Exists(source))
                 {
                     Log.Write(C, "FAIL tkguard.exe not found next to Toolkit.exe: " + source);
-                    return 10;
+                    return ExitCode.Failed;
                 }
 
                 Directory.CreateDirectory(LocalDir);
@@ -63,7 +63,7 @@ namespace Toolkit
                 if (!File.Exists(guardExe) || !File.Exists(Path.Combine(LocalDir, "tk-taskkill.exe")))
                 {
                     Log.Write(C, "FAIL local files missing, hook not installed");
-                    return 10;
+                    return ExitCode.Failed;
                 }
 
                 string value = "\"" + guardExe + "\"";
@@ -74,7 +74,7 @@ namespace Toolkit
             catch (Exception ex)
             {
                 Log.Write(C, "FAIL install: " + ex.Message);
-                return 10;
+                return ExitCode.Failed;
             }
         }
 
@@ -89,7 +89,7 @@ namespace Toolkit
             catch (Exception ex)
             {
                 Log.Write(C, "FAIL remove: " + ex.Message);
-                return 10;
+                return ExitCode.Failed;
             }
         }
 

@@ -32,7 +32,7 @@ namespace Toolkit
             if (string.IsNullOrWhiteSpace(display))
             {
                 Log.Write(C, "FAIL primary display not found");
-                return 10;
+                return ExitCode.Failed;
             }
 
             WaitForGpuDriver(display);
@@ -51,7 +51,7 @@ namespace Toolkit
             catch (NvApiException ex)
             {
                 Log.Write(C, "FAIL " + ex.Message);
-                return 10;
+                return ExitCode.Failed;
             }
 
             bool native = !string.Equals(rc.Timing, "real", StringComparison.OrdinalIgnoreCase);
@@ -140,7 +140,7 @@ namespace Toolkit
             }
 
             Log.Write(C, "DONE failed=" + failed);
-            return failed == 0 ? 0 : 10;
+            return failed == 0 ? 0 : ExitCode.Failed;
         }
 
         /// <summary>
@@ -200,7 +200,7 @@ namespace Toolkit
             if (string.IsNullOrWhiteSpace(display))
             {
                 Log.Write(C, "WARN refresh: primary display not found");
-                return 10;
+                return ExitCode.Failed;
             }
 
             ApplyMaxRefresh(display);

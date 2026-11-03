@@ -36,7 +36,7 @@ namespace Toolkit
             if (!WaitForSource(source, sc.WaitSeconds))
             {
                 Log.Write(C, "FAIL источник недоступен за " + sc.WaitSeconds + " c: " + source);
-                return 10;
+                return ExitCode.Failed;
             }
 
             Log.Write(C, "steam=" + steamDir + " source=" + source);
@@ -82,7 +82,7 @@ namespace Toolkit
             }
 
             Log.Write(C, "DONE failed=" + failed);
-            return failed == 0 ? 0 : 10;
+            return failed == 0 ? 0 : ExitCode.Failed;
         }
 
         private static bool Relink(string linkPath, string target)
@@ -186,7 +186,7 @@ namespace Toolkit
             if (steamDir == null)
             {
                 Log.Write(C, "FAIL Steam не найден");
-                return 10;
+                return ExitCode.Failed;
             }
 
             int downloaded = SteamIcons.DownloadInstalled(steamDir);

@@ -1,31 +1,37 @@
 Option Explicit
 
 ' Скрытый запуск Toolkit при входе в систему.
-' Пересобирает exe, если любой .cs новее собранного бинарника.
+'
+' Папка Toolkit (где лежит этот скрипт) может быть общей и только для чтения, поэтому exe собираются
+' локально в %TEMP%\Toolkit встроенным csc.exe и запускаются оттуда. Данные (config.json, profiles,
+' reg, data, logs) остаются в папке Toolkit: путь к ней передаётся в exe ключом --home.
+' Пересборка только если exe нет или любой .cs новее собранного exe.
 
-Dim fso, sh, base, ps, exePath, buildPs, srcDir
+Dim fso, sh, base, ps, outDir, exePath, guardPath, buildPs, srcDir
 
 Set fso = CreateObject("Scripting.FileSystemObject")
 Set sh = CreateObject("WScript.Shell")
 
 base = fso.GetParentFolderName(WScript.ScriptFullName)
 ps = sh.ExpandEnvironmentStrings("%SystemRoot%") & "\System32\WindowsPowerShell\v1.0\powershell.exe"
-exePath = base & "\Toolkit.exe"
+outDir = sh.ExpandEnvironmentStrings("%TEMP%") & "\Toolkit"
+exePath = outDir & "\Toolkit.exe"
+guardPath = outDir & "\tkguard.exe"
 buildPs = base & "\build.ps1"
 srcDir = base & "\src"
 
-If NeedRebuild(fso, exePath, srcDir) Then
-  sh.Run """" & ps & """ -NoProfile -ExecutionPolicy Bypass -File """ & buildPs & """", 0, True
+If NeedRebuild(fso, exePath, guardPath, srcDir) Then
+  sh.Run """" & ps & """ -NoProfile -ExecutionPolicy Bypass -File """ & buildPs & """ -Out """ & outDir & """", 0, True
 End If
 
 If fso.FileExists(exePath) Then
-  sh.Run """" & exePath & """ run", 0, False
+  sh.Run """" & exePath & """ run --home """ & base & """", 0, False
 End If
 
-Function NeedRebuild(fileSystem, exe, sourceDir)
+Function NeedRebuild(fileSystem, exe, guardExe, sourceDir)
   NeedRebuild = False
 
-  If Not fileSystem.FileExists(exe) Then
+  If Not fileSystem.FileExists(exe) Or Not fileSystem.FileExists(guardExe) Then
     NeedRebuild = True
     Exit Function
   End If

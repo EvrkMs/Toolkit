@@ -28,7 +28,7 @@ namespace Toolkit
             catch (Exception ex)
             {
                 Log.Write(component, "ERROR " + ex.Message);
-                return 10;
+                return ExitCode.Failed;
             }
         }
     }

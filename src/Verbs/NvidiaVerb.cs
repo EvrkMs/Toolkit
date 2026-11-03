@@ -19,13 +19,13 @@ namespace Toolkit
             if (string.IsNullOrWhiteSpace(exePath) || !File.Exists(exePath))
             {
                 Log.Write("NVIDIA", "exe missing: " + exePath);
-                return 10;
+                return ExitCode.Failed;
             }
 
             if (string.IsNullOrWhiteSpace(profilePath) || !File.Exists(profilePath))
             {
                 Log.Write("NVIDIA", "profile missing: " + profilePath);
-                return 10;
+                return ExitCode.Failed;
             }
 
             // Ключ импорта задаётся конфигом: набор поддерживаемых аргументов
@@ -51,7 +51,7 @@ namespace Toolkit
                 Log.Write("NVIDIA", "FAIL(" + code + ") args=" + arguments);
             }
 
-            return 10;
+            return ExitCode.Failed;
         }
     }
 }

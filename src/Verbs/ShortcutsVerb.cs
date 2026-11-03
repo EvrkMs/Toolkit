@@ -55,13 +55,13 @@ namespace Toolkit
             if (!DesktopListView.TryGetStableItems(10000, out listView, out desktopItems, out stabilized))
             {
                 Log.Write("SHORTCUT", "desktop ListView not found or empty");
-                return 10;
+                return ExitCode.Failed;
             }
 
             if (!stabilized)
             {
                 Log.Write("SHORTCUT", "ОТМЕНА save: рабочий стол не устоялся, профиль мог получиться неполным");
-                return 10;
+                return ExitCode.Failed;
             }
 
             // Разрешение всегда берётся с текущего экрана; --resolution нужен только
@@ -107,7 +107,7 @@ namespace Toolkit
                 if (fallback == null)
                 {
                     Log.Write("SHORTCUT", "no profile for " + resolution + " and no fallback");
-                    return 10;
+                    return ExitCode.Failed;
                 }
 
                 profilePath = fallback;
@@ -118,7 +118,7 @@ namespace Toolkit
             if (snapshot == null)
             {
                 Log.Write("SHORTCUT", "profile parse failed: " + profilePath);
-                return 10;
+                return ExitCode.Failed;
             }
 
             List<ShortcutData> shortcuts = snapshot.Shortcuts ?? new List<ShortcutData>();

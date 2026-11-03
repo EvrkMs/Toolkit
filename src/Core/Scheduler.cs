@@ -117,7 +117,7 @@ namespace Toolkit
             }
             catch (Exception ex)
             {
-                node.Result = 10;
+                node.Result = ExitCode.Failed;
                 Log.Write(C, step.Name + " ERROR " + ex.Message);
             }
             finally

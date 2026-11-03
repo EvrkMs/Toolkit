@@ -23,14 +23,14 @@ namespace Toolkit
             if (!TryParseMode(sc.Mode, out scaling))
             {
                 Log.Write(C, "FAIL unknown mode: " + sc.Mode + " (fullscreen|aspect|none|integer)");
-                return 10;
+                return ExitCode.Failed;
             }
 
             string display = string.IsNullOrWhiteSpace(sc.Display) ? DisplayInterop.PrimaryDisplayName() : sc.Display;
             if (string.IsNullOrWhiteSpace(display))
             {
                 Log.Write(C, "FAIL primary display not found");
-                return 10;
+                return ExitCode.Failed;
             }
 
             try
@@ -57,7 +57,7 @@ namespace Toolkit
             catch (NvApiException ex)
             {
                 Log.Write(C, "FAIL " + ex.Message);
-                return 10;
+                return ExitCode.Failed;
             }
         }
 

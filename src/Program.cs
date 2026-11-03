@@ -5,19 +5,19 @@ namespace Toolkit
 {
     internal static class Program
     {
-        private const int ExitOk = 0;
-        private const int ExitFatal = 1;
-        private const int ExitUsage = 2;
+        private const int ExitOk = ExitCode.Ok;
+        private const int ExitFatal = ExitCode.Fatal;
+        private const int ExitUsage = ExitCode.Usage;
 
         private static int Main(string[] rawArgs)
         {
             ConsoleBridge.AttachToParent();
-            Paths.BaseDir = AppDomain.CurrentDomain.BaseDirectory.TrimEnd('\\');
 
             Cli cli = Cli.Parse(rawArgs);
             bool verbose = cli.Flag("--verbose") || cli.Flag("-v");
 
-            Log.Init(Paths.BaseDir, verbose);
+            Paths.Init(cli.Option("--home", null));
+            Log.Init(Paths.LogsDir, verbose);
             NativeMethods.EnableDpiAwareness();
 
             if (string.IsNullOrWhiteSpace(cli.Verb) || cli.Flag("--help") || cli.Flag("-h") ||
@@ -161,7 +161,9 @@ namespace Toolkit
             Console.WriteLine("  Toolkit.exe explorer restart        перезапустить explorer");
             Console.WriteLine();
             Console.WriteLine("Общие ключи:");
-            Console.WriteLine("  --config <path>                     по умолчанию Toolkit\\config.json");
+            Console.WriteLine("  --home <path>                       папка Toolkit с config.json, profiles, reg, data, logs");
+            Console.WriteLine("                                      (или переменная TOOLKIT_HOME; по умолчанию папка с exe)");
+            Console.WriteLine("  --config <path>                     по умолчанию <home>\\config.json");
             Console.WriteLine("  --explorer-restart auto|never|force перекрывает политику из конфига");
             Console.WriteLine("  --verbose, -v                       дублировать лог в консоль");
             Console.WriteLine();

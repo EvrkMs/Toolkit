@@ -64,14 +64,14 @@ namespace Toolkit
             if (!File.Exists(Paths.TaskbarProfile))
             {
                 Log.Write("TASKBAR", "no profile: " + Paths.TaskbarProfile);
-                return 10;
+                return ExitCode.Failed;
             }
 
             Snapshot snapshot = Json.Read<Snapshot>(Paths.TaskbarProfile);
             if (snapshot == null)
             {
                 Log.Write("TASKBAR", "profile parse failed: " + Paths.TaskbarProfile);
-                return 10;
+                return ExitCode.Failed;
             }
 
             Directory.CreateDirectory(PinnedDir);

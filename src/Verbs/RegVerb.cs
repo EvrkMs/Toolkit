@@ -49,7 +49,7 @@ namespace Toolkit
             }
 
             Log.Write("REG", "DONE failed=" + failed);
-            return failed == 0 ? 0 : 10;
+            return failed == 0 ? 0 : ExitCode.Failed;
         }
 
         private static List<string> Collect(RegConfig cfg)
