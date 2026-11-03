@@ -111,7 +111,7 @@ namespace Toolkit
         private static List<Mapping> BuildSingleMapping(Options opt)
         {
             List<Mapping> list = new List<Mapping>();
-            string src = Environment.ExpandEnvironmentVariables(opt.Source);
+            string src = Paths.Resolve(opt.Source);
             string dst = Environment.ExpandEnvironmentVariables(opt.Dest);
 
             if (!string.IsNullOrWhiteSpace(src) && !string.IsNullOrWhiteSpace(dst))
@@ -129,7 +129,8 @@ namespace Toolkit
         private static List<Mapping> BuildAutoMappings(Options opt)
         {
             List<Mapping> list = new List<Mapping>();
-            string root = Environment.ExpandEnvironmentVariables(opt.Root ?? "");
+            // Относительный путь считается от папки Toolkit (например data\GameFix).
+            string root = Paths.Resolve(opt.Root ?? "");
 
             if (string.IsNullOrWhiteSpace(root) || !Directory.Exists(root))
             {

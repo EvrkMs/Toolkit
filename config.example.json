@@ -40,7 +40,7 @@
   },
   "symlink": {
     "enabled": true,
-    "root": "D:\\GameFix",
+    "root": "data\\GameFix",
     "recreate": true,
     "includeProgramData": true,
     "includeProgramFiles": false,
@@ -49,7 +49,7 @@
   "steam": {
     "enabled": true,
     "installPath": "",
-    "source": "D:\\GameFix\\Steam",
+    "source": "data\\GameFix\\Steam",
     "waitSeconds": 60,
     "downloadIcons": true,
     "links": [

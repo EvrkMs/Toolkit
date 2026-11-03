@@ -118,7 +118,7 @@ namespace Toolkit
             if (Symlink == null) Symlink = new SymlinkConfig();
             if (Steam == null) Steam = new SteamConfig();
             if (Steam.WaitSeconds <= 0) Steam.WaitSeconds = 60;
-            if (string.IsNullOrWhiteSpace(Steam.Source)) Steam.Source = @"E:\GameFix\Steam";
+            if (string.IsNullOrWhiteSpace(Steam.Source)) Steam.Source = @"data\GameFix\Steam";
             if (Steam.Links == null || Steam.Links.Length == 0)
             {
                 Steam.Links = new[]
@@ -141,7 +141,7 @@ namespace Toolkit
 
             if (Nvidia.TimeoutSeconds <= 0) Nvidia.TimeoutSeconds = 20;
             if (Symlink.TimeoutSeconds <= 0) Symlink.TimeoutSeconds = 180;
-            if (string.IsNullOrWhiteSpace(Symlink.Root)) Symlink.Root = @"E:\GameFix";
+            if (string.IsNullOrWhiteSpace(Symlink.Root)) Symlink.Root = @"data\GameFix";
         }
     }
 

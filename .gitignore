@@ -2,3 +2,10 @@ logs/*
 profiles/*
 reg/*
 *.exe
+
+# Рабочий конфиг клуба: в репозитории только config.example.json
+config.json
+
+# Папка с данными клуба (GameFix и т.п.): сама папка в репозитории, содержимое нет
+data/*
+!data/.gitkeep
