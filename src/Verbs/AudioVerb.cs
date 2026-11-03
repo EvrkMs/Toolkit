@@ -47,7 +47,7 @@ namespace Toolkit
         /// Bluetooth), независимо от того, подключено ли USB-устройство. Если USB-вывод есть, он становится
         /// устройством по умолчанию; если нет, Windows сама назначит его при подключении, потому что других не осталось.
         /// Устройства ввода (микрофоны) не отключаются никогда.
-        /// Шаг должен выполняться после загрузки драйвера NVIDIA и появления его аудио (gate NvidiaAudio).
+        /// Шаг должен выполняться после загрузки драйвера NVIDIA (gate GpuDriver).
         /// </summary>
         public static int RunDevices(ToolkitConfig cfg)
         {
@@ -69,21 +69,6 @@ namespace Toolkit
                 Log.Write("AUDIO", "devices ERROR " + ex.Message);
                 return 10;
             }
-        }
-
-        /// <summary>
-        /// Есть ли среди устройств вывода звук NVIDIA (HDMI/DP). Нужно gate'у NvidiaAudio: пока оно не появилось,
-        /// отключать его рано, потому что его просто не окажется в списке.
-        /// </summary>
-        public static bool HasNvidiaRenderEndpoint()
-        {
-            foreach (EndpointRef endpoint in EnumerateEndpoints(EDataFlow.eRender, DEVICE_STATE_ACTIVE | DEVICE_STATE_UNPLUGGED, "nvidia-scan"))
-            {
-                string name = GetEndpointName(endpoint.Device);
-                if (name != null && name.IndexOf("NVIDIA", StringComparison.OrdinalIgnoreCase) >= 0) return true;
-            }
-
-            return false;
         }
 
         /// <summary>Шаг audio.levels: громкость колонок и микрофона, AGC, усиление микрофона. Ничего не отключает.</summary>

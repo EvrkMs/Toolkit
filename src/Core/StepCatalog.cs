@@ -47,15 +47,16 @@ namespace Toolkit
                     null, Gated(Readiness.GpuDriver));
             }
 
-            // Звук. Отключение лишних устройств вывода ждёт драйвер и появление NVIDIA-аудио, иначе
-            // его просто не успеют отключить. Уровни идут после: дефолтным к этому моменту уже стал USB.
+            // Звук. Отключение любых не-USB устройств вывода ждёт загрузки драйвера NVIDIA: пока он не
+            // загружен, часть устройств (HDMI/DP) ещё не создана и их нечем отключить.
+            // Уровни идут после: дефолтным к этому моменту уже стал USB.
             bool usbOnly = cfg.Audio.UsbOnly.HasValue && cfg.Audio.UsbOnly.Value;
             if (cfg.Audio.Enabled)
             {
                 if (usbOnly)
                 {
                     Add(steps, "audio.devices", delegate { return AudioVerb.RunDevices(cfg); },
-                        null, Gated(Readiness.NvidiaAudio));
+                        null, Gated(Readiness.GpuDriver));
                 }
 
                 Add(steps, "audio.levels", delegate { return AudioVerb.RunLevels(cfg); },

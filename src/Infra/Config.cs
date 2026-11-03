@@ -199,13 +199,6 @@ namespace Toolkit
         [DataMember(Name = "gpuDriverSeconds")]
         public int? GpuDriverSeconds { get; set; }
 
-        /// <summary>
-        /// Сколько секунд после загрузки драйвера ждать звуковое устройство NVIDIA. Не задано — 15, 0 — не ждать.
-        /// Для ПК, где HDMI-звук NVIDIA выключен, можно поставить 0.
-        /// </summary>
-        [DataMember(Name = "nvidiaAudioSeconds")]
-        public int? NvidiaAudioSeconds { get; set; }
-
         /// <summary>Сколько секунд ждать оболочку Windows перед раскладкой иконок. Не задано — 15.</summary>
         [DataMember(Name = "shellSeconds")]
         public int? ShellSeconds { get; set; }
@@ -213,7 +206,6 @@ namespace Toolkit
         public void ApplyDefaults()
         {
             GpuDriverSeconds = Clamp(GpuDriverSeconds, 60);
-            NvidiaAudioSeconds = Clamp(NvidiaAudioSeconds, 15);
             ShellSeconds = Clamp(ShellSeconds, 15);
         }
 

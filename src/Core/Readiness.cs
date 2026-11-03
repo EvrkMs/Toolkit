@@ -7,7 +7,6 @@ namespace Toolkit
     internal static class Readiness
     {
         public static GpuDriverGate GpuDriver;
-        public static NvidiaAudioGate NvidiaAudio;
         public static ShellGate Shell;
 
         public static void Init(ToolkitConfig cfg)
@@ -15,7 +14,6 @@ namespace Toolkit
             GatesConfig g = cfg.Gates;
 
             GpuDriver = new GpuDriverGate(cfg.Resolutions.Display, g.GpuDriverSeconds.Value * 1000);
-            NvidiaAudio = new NvidiaAudioGate(GpuDriver, g.NvidiaAudioSeconds.Value * 1000);
             Shell = new ShellGate(g.ShellSeconds.Value * 1000);
         }
     }
@@ -56,36 +54,6 @@ namespace Toolkit
                 string adapter = DisplayInterop.AdapterDescription(display);
                 return adapter != null && adapter.IndexOf("NVIDIA", StringComparison.OrdinalIgnoreCase) >= 0;
             }, _timeoutMs, 500);
-        }
-    }
-
-    /// <summary>
-    /// Звуковое устройство NVIDIA (HDMI/DP) появилось в списке устройств вывода.
-    /// Оно создаётся драйвером видеокарты чуть позже самого драйвера, поэтому сначала ждём GpuDriver,
-    /// а потом ещё не больше nvidiaAudioSeconds. Если драйвера нет или он не дождался, не ждём вовсе.
-    /// </summary>
-    internal sealed class NvidiaAudioGate : Gate
-    {
-        private readonly Gate _driver;
-        private readonly int _timeoutMs;
-
-        public NvidiaAudioGate(Gate driver, int timeoutMs)
-        {
-            _driver = driver;
-            _timeoutMs = timeoutMs;
-        }
-
-        public override string Name
-        {
-            get { return "NvidiaAudio"; }
-        }
-
-        protected override bool Poll()
-        {
-            if (!_driver.Wait()) return false;
-            if (_timeoutMs <= 0) return true;
-
-            return PollUntil(delegate { return AudioVerb.HasNvidiaRenderEndpoint(); }, _timeoutMs, 500);
         }
     }
 

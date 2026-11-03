@@ -60,7 +60,6 @@
   },
   "gates": {
     "gpuDriverSeconds": 60,
-    "nvidiaAudioSeconds": 15,
     "shellSeconds": 15
   },
   "guard": {

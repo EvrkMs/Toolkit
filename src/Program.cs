@@ -94,7 +94,7 @@ namespace Toolkit
                 case "audio":
                     if (cfg.Audio.Enabled && cfg.Audio.UsbOnly.HasValue && cfg.Audio.UsbOnly.Value)
                     {
-                        Readiness.NvidiaAudio.Wait();
+                        Readiness.GpuDriver.Wait();
                     }
                     return AudioVerb.Run(cfg);
 
